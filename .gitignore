@@ -1,0 +1,24 @@
+# Build outputs
+dist/
+Y7st-最终交付/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Runtime/temp
+*.log
+*.tmp
+*.temp
+__pycache__/
+*.pyc
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local test/runtime leftovers
+.tmp/
+tmp/

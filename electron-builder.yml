@@ -1,0 +1,27 @@
+appId: com.y7api.y7st
+productName: Y7st
+artifactName: Y7st.exe
+directories:
+  output: dist/electron
+  buildResources: build
+files:
+  - src/electron-main.js
+  - package.json
+extraResources:
+  - from: dist/Y7st-core.exe
+    to: Y7st-core.exe
+  - from: build/Y7api.ico
+    to: Y7api.ico
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  icon: build/Y7api.ico
+  signAndEditExecutable: false
+  signExecutable: false
+portable:
+  artifactName: Y7st.exe
+  requestExecutionLevel: user
+  splashImage: false
+  useZip: false
