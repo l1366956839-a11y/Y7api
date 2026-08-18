@@ -12,7 +12,8 @@ test('launcher uses HTTP health checks and passes an EXE-adjacent user data root
   assert.match(launcher, /path\.join\(exeDir, 'Y7st'\)/);
   assert.match(launcher, /Y7ST_RUNTIME_DIR/);
   assert.match(launcher, /function waitForHealthyServer/);
-  assert.match(launcher, /\/api\/providers/);
+  assert.match(launcher, /function waitForPort/);
+  assert.match(launcher, /await waitForPort\(upstreamPort\)/);
   assert.match(launcher, /function verifyRuntimeDependencies/);
   assert.match(launcher, /function startStageTimer/);
   assert.match(launcher, /stageTimer\.end\('extract'/);

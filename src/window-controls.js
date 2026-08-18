@@ -182,8 +182,9 @@ async function tick(){
     tickElapsed();
     if(!ready && await canvasReady()){
       ready=true;
-      statusEl.textContent='启动完成，可以进入软件。';
+      statusEl.textContent='启动完成，正在进入软件…';
       setProgress(100,'ready');
+      enterApp(); // 就绪后立即导航，不依赖按钮点击或倒计时
       return;
     }
     const info=await fetchStatus();

@@ -188,25 +188,42 @@ function selfExtract() {
   fs.writeFileSync(runtimeVersionFile, EMBED_VERSION, 'utf8');
 }
 
-function waitForHealthyServer(url, validate, timeoutMs = 120000) {
+function waitForPort(port, host = '127.0.0.1', timeoutMs = 180000) {
+  const net = require('net');
+  const started = Date.now();
+  return new Promise((resolve, reject) => {
+    const probe = () => {
+      const socket = new net.Socket();
+      socket.setTimeout(5000);
+      socket.once('connect', () => { socket.destroy(); resolve(); });
+      socket.once('error', () => { socket.destroy(); retry(); });
+      socket.once('timeout', () => { socket.destroy(); retry(); });
+      socket.connect(port, host);
+    };
+    const retry = () => {
+      if (Date.now() - started > timeoutMs) reject(new Error(`等待端口就绪超时：${host}:${port}`));
+      else setTimeout(probe, 1000);
+    };
+    probe();
+  });
+}
+
+// 保留基于 HTTP 的健康检查（供代理/壳使用）；上游就绪改用 waitForPort 更稳妥。
+function waitForHealthyServer(url, timeoutMs = 120000) {
   const started = Date.now();
   return new Promise((resolve, reject) => {
     const probe = () => {
       const req = http.get(url, (res) => {
-        const chunks = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
-          const body = Buffer.concat(chunks).toString('utf8');
-          if (res.statusCode === 200 && validate(body, res.headers)) return resolve();
-          retry();
-        });
+        res.resume();
+        if (res.statusCode >= 200 && res.statusCode < 400) return resolve();
+        retry();
       });
-      req.setTimeout(2000, () => { req.destroy(); retry(); });
+      req.setTimeout(10000, () => { req.destroy(); retry(); });
       req.on('error', retry);
     };
     const retry = () => {
       if (Date.now() - started > timeoutMs) reject(new Error(`等待服务健康检查超时：${url}`));
-      else setTimeout(probe, 500);
+      else setTimeout(probe, 1000);
     };
     probe();
   });
@@ -328,10 +345,8 @@ async function main() {
   try {
     stageTimer.begin('upstream-health');
         writeStartupStatus({ phase: 'upstream-health', status: 'running', message: '正在启动本地服务', progress: 70 });
-        await waitForHealthyServer(
-          `http://127.0.0.1:${upstreamPort}/api/providers`,
-          (body) => body.includes('providers')
-        );
+        // 上游就绪用 TCP 端口连通性判断（不依赖 HTTP 解析，避免机器防火墙/代理差异导致的误判）
+        await waitForPort(upstreamPort);
         stageTimer.end('upstream-health');
         writeStartupStatus({ phase: 'upstream-health', status: 'completed', message: '本地服务已就绪', progress: 82 });
       } catch (error) {
@@ -343,8 +358,7 @@ async function main() {
         stageTimer.begin('shell-health');
         writeStartupStatus({ phase: 'shell-health', status: 'running', message: '正在打开桌面外壳', progress: 90 });
         await waitForHealthyServer(
-          `http://127.0.0.1:${shellPort}/canvas`,
-          (body, headers) => String(headers['content-type'] || '').includes('text/html') && body.includes('data-y7st-shell-injected')
+          `http://127.0.0.1:${shellPort}/canvas`
         );
         stageTimer.end('shell-health');
         writeStartupStatus({ phase: 'ready', status: 'ready', message: '启动完成，可以进入画布', progress: 100 });

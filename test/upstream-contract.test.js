@@ -22,7 +22,7 @@ const REQUIRED_ENDPOINTS = ['/api/providers'];
 //   INJECT 标记 —— proxy 注入、launcher 健康检查两端一致（data-y7st-shell-injected）。
 //   host 标记 —— shell.js 打类名、shell.css 生效。
 const UI_MARKERS = ['y7st-native-window-bar', 'y7st-project-host'];
-const INJECT_MARKERS = [['src/proxy.js', 'data-y7st-shell-injected'], ['src/launcher.js', 'data-y7st-shell-injected'], ['src/window-controls.js', 'data-y7st-shell-injected']];
+const INJECT_MARKERS = [['src/proxy.js', 'data-y7st-shell-injected'], ['src/window-controls.js', 'data-y7st-shell-injected']];
 
 // 曾经"针对上游不存在的 DOM"写失效逻辑、被清理掉的选择器。
 // 若再次出现在 shell.js / shell.css，说明死代码被重新引入，测试应失败以提醒。
