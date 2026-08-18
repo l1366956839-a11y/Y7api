@@ -26,14 +26,9 @@ const INJECT_MARKERS = [['src/proxy.js', 'data-y7st-shell-injected'], ['src/laun
 
 // 曾经"针对上游不存在的 DOM"写失效逻辑、被清理掉的选择器。
 // 若再次出现在 shell.js / shell.css，说明死代码被重新引入，测试应失败以提醒。
+// 注：github-entry-btn / social-row-lite / author-name-lite 等现在被壳 CSS 主动用于隐藏，不再属死代码，已从本列表移除。
 const FORBIDDEN_DEAD_DEPS = [
   'studioSidebar',
-  'sidebarLogoToggle',
-  'github-entry-btn',
-  'update-now-btn',
-  'project-version-badge',
-  'author-name-lite',
-  'social-row-lite',
   'toggleSidebarPinned'
 ];
 

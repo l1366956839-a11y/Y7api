@@ -153,10 +153,26 @@
     sync();
   }
 
+  // 替换侧边栏顶部 logo 为 Y7api 的 logo 图片（原来只是一个小圆点）
+  function replaceSidebarLogo() {
+    if (!isTopDocument || isWelcome) return;
+    const toggle = document.getElementById('sidebarLogoToggle');
+    if (!toggle || toggle.querySelector('.y7st-sidebar-logo')) return;
+    // 清空原始内容（圆点），替换为 Y7api logo 图片
+    toggle.innerHTML = '';
+    const img = document.createElement('img');
+    img.className = 'y7st-sidebar-logo';
+    img.src = logoSrc;
+    img.alt = 'Y7api';
+    img.style.cssText = 'width:28px;height:28px;border-radius:8px;object-fit:cover;display:block;margin:auto';
+    toggle.appendChild(img);
+  }
+
   function init() {
     applyShellHost();
     setupWelcomeStartupPanel();
     mountWindowBar();
+    replaceSidebarLogo();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

@@ -10,6 +10,16 @@ html.y7st-project-host{--y7st-window-bar-height:28px}
 .y7st-native-window-controls button:hover{background:#2a2d33}
 .y7st-native-window-controls button.close:hover{background:#d83b3b;color:#fff}
 .y7st-project-host{margin:0!important;padding:0!important}
+/* 隐藏原项目主页、更新按钮、版本号、作者名与社交链接（左下角四个链接 + 项目主页） */
+.y7st-project-host #github-entry-btn,
+.y7st-project-host #update-now-btn,
+.y7st-project-host #project-version-badge,
+.y7st-project-host .author-name-lite,
+.y7st-project-host .letter-d,
+.y7st-project-host .letter-x,
+.y7st-project-host .social-row-lite {
+  display: none !important;
+}
 .y7st-project-host body{margin:0!important}
 .y7st-project-host .app-shell{margin-top:0!important;padding-top:0!important}
 .y7st-project-host .stage{margin-top:0!important;padding-top:0!important}
