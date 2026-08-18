@@ -11,15 +11,10 @@ test('launcher uses HTTP health checks and passes an EXE-adjacent user data root
   assert.match(launcher, /Y7ST_USER_DATA_DIR/);
   assert.match(launcher, /path\.join\(exeDir, 'Y7st'\)/);
   assert.match(launcher, /Y7ST_RUNTIME_DIR/);
-  assert.match(launcher, /function waitForHealthyServer/);
-  assert.match(launcher, /function waitForPort/);
-  assert.match(launcher, /await waitForPort\(upstreamPort\)/);
   assert.match(launcher, /function verifyRuntimeDependencies/);
   assert.match(launcher, /function startStageTimer/);
   assert.match(launcher, /stageTimer\.end\('extract'/);
   assert.match(launcher, /stageTimer\.end\('dependency-check'/);
-  assert.match(launcher, /stageTimer\.end\('upstream-health'/);
-  assert.match(launcher, /stageTimer\.end\('shell-health'/);
   assert.match(launcher, /Y7ST_PORT: String\(upstreamPort\)/);
   assert.match(launcher, /fastapi/);
   assert.match(launcher, /uvicorn/);

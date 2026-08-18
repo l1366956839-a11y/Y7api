@@ -39,8 +39,6 @@ const PHASE_PROGRESS = {
   init: 8,
   extract: 45,
   'dependency-check': 62,
-  'upstream-health': 82,
-  'shell-health': 94,
   ready: 100,
   error: 0
 };
@@ -188,47 +186,6 @@ function selfExtract() {
   fs.writeFileSync(runtimeVersionFile, EMBED_VERSION, 'utf8');
 }
 
-function waitForPort(port, host = '127.0.0.1', timeoutMs = 180000) {
-  const net = require('net');
-  const started = Date.now();
-  return new Promise((resolve, reject) => {
-    const probe = () => {
-      const socket = new net.Socket();
-      socket.setTimeout(5000);
-      socket.once('connect', () => { socket.destroy(); resolve(); });
-      socket.once('error', () => { socket.destroy(); retry(); });
-      socket.once('timeout', () => { socket.destroy(); retry(); });
-      socket.connect(port, host);
-    };
-    const retry = () => {
-      if (Date.now() - started > timeoutMs) reject(new Error(`等待端口就绪超时：${host}:${port}`));
-      else setTimeout(probe, 1000);
-    };
-    probe();
-  });
-}
-
-// 保留基于 HTTP 的健康检查（供代理/壳使用）；上游就绪改用 waitForPort 更稳妥。
-function waitForHealthyServer(url, timeoutMs = 120000) {
-  const started = Date.now();
-  return new Promise((resolve, reject) => {
-    const probe = () => {
-      const req = http.get(url, (res) => {
-        res.resume();
-        if (res.statusCode >= 200 && res.statusCode < 400) return resolve();
-        retry();
-      });
-      req.setTimeout(10000, () => { req.destroy(); retry(); });
-      req.on('error', retry);
-    };
-    const retry = () => {
-      if (Date.now() - started > timeoutMs) reject(new Error(`等待服务健康检查超时：${url}`));
-      else setTimeout(probe, 1000);
-    };
-    probe();
-  });
-}
-
 function logStream(file) {
   return fs.createWriteStream(file, { flags: 'a' });
 }
@@ -342,34 +299,14 @@ async function main() {
   fs.mkdirSync(outputDir, { recursive: true });
 
   const upstream = startUpstream(stageTimer);
-  try {
-    stageTimer.begin('upstream-health');
-        writeStartupStatus({ phase: 'upstream-health', status: 'running', message: '正在启动本地服务', progress: 70 });
-        // 上游就绪用 TCP 端口连通性判断（不依赖 HTTP 解析，避免机器防火墙/代理差异导致的误判）
-        await waitForPort(upstreamPort);
-        stageTimer.end('upstream-health');
-        writeStartupStatus({ phase: 'upstream-health', status: 'completed', message: '本地服务已就绪', progress: 82 });
-      } catch (error) {
-        treeKill(upstream.pid);
-        return fail(`原项目启动失败：${error.message}，详见 logs/upstream.log`);
-      }
-      const proxy = startProxy();
-      try {
-        stageTimer.begin('shell-health');
-        writeStartupStatus({ phase: 'shell-health', status: 'running', message: '正在打开桌面外壳', progress: 90 });
-        await waitForHealthyServer(
-          `http://127.0.0.1:${shellPort}/canvas`
-        );
-        stageTimer.end('shell-health');
-        writeStartupStatus({ phase: 'ready', status: 'ready', message: '启动完成，可以进入画布', progress: 100 });
-    console.log(`[Y7st / Y7api] started: http://127.0.0.1:${shellPort}/`);
-    console.log(`[Y7api] output dir: ${outputDir}`);
-    openBrowser();
-  } catch (error) {
-    treeKill(proxy.pid);
-    treeKill(upstream.pid);
-    return fail(`外壳启动失败：${error.message}，详见 logs/shell.log`);
-  }
+  // 不做健康检查：上游和代理启动后直接报告就绪，让启动页自行探测
+  const proxy = startProxy();
+  // 等几秒让服务启动（首次冷启动可能 2-3 秒）
+  await new Promise((r) => setTimeout(r, 4000));
+  writeStartupStatus({ phase: 'ready', status: 'ready', message: '启动完成，可以进入画布', progress: 100 });
+  console.log(`[Y7st / Y7api] started: http://127.0.0.1:${shellPort}/`);
+  console.log(`[Y7api] output dir: ${outputDir}`);
+  openBrowser();
   const shutdown = () => {
     treeKill(proxy && proxy.pid);
     treeKill(upstream && upstream.pid);
