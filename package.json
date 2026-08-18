@@ -1,0 +1,30 @@
+{
+  "name": "y7st-portable-shell",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Y7st desktop application by Y7api",
+  "main": "src/electron-main.js",
+  "type": "commonjs",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.js",
+    "build:core": "node scripts/build-sea.js",
+    "build": "npm run build:core && cp dist/Y7st.exe dist/Y7st-core.exe && electron-builder --win portable --config electron-builder.yml",
+    "release:portable": "node scripts/release-portable.js",
+    "sync:upstream": "node scripts/sync-upstream.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^3.0.5"
+  },
+  "devDependencies": {
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.1",
+    "pkg": "^5.8.1",
+    "postject": "^1.0.0-alpha.6",
+    "tar-stream": "^3.2.0"
+  }
+}

@@ -1,0 +1,38 @@
+# Y7st (Y7api) 壳 —— 许可与授权声明
+
+本仓库（Y7st / Y7api 启动外壳）是对第三方开源项目 **hero8152/Infinite-Canvas** 的封装/适配壳。
+分发产物会**内嵌整个上游项目**。因此本壳的许可严格跟随并受限于上游项目的许可条款。
+
+## 上游项目
+
+- 项目：Infinite-Canvas
+- 作者：hero8152
+- 仓库：https://github.com/hero8152/Infinite-Canvas
+- 上游 LICENSE（原样引用）：
+
+```
+禁止商业用途
+Commercial use is prohibited.
+
+* 可以自己使用和公司使用，禁止用于任何形式的修改封装成商业产品，商用须取得授权。
+* 根据代码二次开发的软件必须保持开源并注明来源作者
+
+* This software is for personal and company use only, but is prohibited from being
+  modified or packaged into commercial products in any way. Commercial use requires
+  authorization.
+* Software developed based on this code must remain open source and the original
+  author must be credited.
+```
+
+## 壳自身的许可约定
+
+基于上游条款，本壳（Y7st / Y7api）约定如下：
+
+- **非商用**：仅限个人或公司内部使用；禁止以任何形式将本壳或本壳与上游的打包产物作为
+  商业产品售卖/分发/获利。商用必须取得上游作者（hero8152）的授权。
+- **必须开源**：基于上游代码二次开发的产物（含本壳）必须保持开源。
+- **必须署名**：随产物/分发必须附带本文件与署名，注明来源作者 hero8152 与上游仓库链接。
+
+如果你打算跳过上述任意约束（尤其是商用或闭源），**必须首先取得上游作者书面授权**。
+
+- 本文件同样适用于 `release-portable.js` 生成的交付包（`使用说明.txt` 会引用本项目与上游项目署名）。
