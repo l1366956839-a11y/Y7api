@@ -135,7 +135,9 @@ const phaseProgress={init:8,extract:45,'dependency-check':62,'upstream-health':8
 function enterApp(){
   if(!(ready&&progress>=100)) return;
   if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}
-  location.href='http://127.0.0.1:'+shellPort+'/canvas';
+  const target='http://127.0.0.1:'+shellPort+'/canvas';
+  if(window.y7stWindow&&window.y7stWindow.navigateTo) window.y7stWindow.navigateTo(target);
+  else location.href=target;
 }
 function startCountdown(){
   if(countdownTimer) return;
@@ -377,6 +379,12 @@ function registerWindowControls(getMainWindow, app, options = {}) {
     fs.writeFileSync(outFile, sections.join(nl), 'utf8');
     await shell.showItemInFolder(outFile);
     return { path: outFile };
+  });
+  ipcMain.on('y7st-window:navigate', (_, url) => {
+    const mainWindow = getMainWindow();
+    if (mainWindow && !mainWindow.isDestroyed() && typeof url === 'string') {
+      mainWindow.loadURL(url).catch(() => {});
+    }
   });
 }
 

@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('y7stWindow', {
   close: () => ipcRenderer.send('y7st-window:close'),
   isMaximized: () => ipcRenderer.invoke('y7st-window:is-maximized'),
   openLogs: () => ipcRenderer.invoke('y7st-open-logs'),
-  exportDiagnostics: () => ipcRenderer.invoke('y7st-export-diagnostics')
+  exportDiagnostics: () => ipcRenderer.invoke('y7st-export-diagnostics'),
+  navigateTo: (url) => ipcRenderer.send('y7st-window:navigate', url)
 });
