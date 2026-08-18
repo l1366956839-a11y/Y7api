@@ -168,11 +168,25 @@
     toggle.appendChild(img);
   }
 
+  // 直接用 JS 隐藏上游品牌元素（左下角社交链接、作者名、项目主页、更新按钮、版本号）
+  // 不用 CSS 规则，避免上游 CSS 优先级覆盖
+  function hideUpstreamBranding() {
+    if (isWelcome) return;
+    ['github-entry-btn','update-now-btn','project-version-badge'].forEach(function(id){
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.querySelectorAll('.author-name-lite,.letter-d,.letter-x,.social-row-lite').forEach(function(el){
+      el.style.display = 'none';
+    });
+  }
+
   function init() {
     applyShellHost();
     setupWelcomeStartupPanel();
     mountWindowBar();
     replaceSidebarLogo();
+    hideUpstreamBranding();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
