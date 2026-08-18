@@ -154,31 +154,49 @@
   }
 
   // 替换侧边栏顶部 logo 为 Y7api 的 logo 图片（原来只是一个小圆点）
+  // 用 MutationObserver 兜底，确保即使上游 JS 动态渲染也能替换
   function replaceSidebarLogo() {
     if (!isTopDocument || isWelcome) return;
-    const toggle = document.getElementById('sidebarLogoToggle');
-    if (!toggle || toggle.querySelector('.y7st-sidebar-logo')) return;
-    // 清空原始内容（圆点），替换为 Y7api logo 图片
-    toggle.innerHTML = '';
-    const img = document.createElement('img');
-    img.className = 'y7st-sidebar-logo';
-    img.src = logoSrc;
-    img.alt = 'Y7api';
-    img.style.cssText = 'width:28px;height:28px;border-radius:8px;object-fit:cover;display:block;margin:auto';
-    toggle.appendChild(img);
+    var done = false;
+    var tryReplace = function() {
+      if (done) return;
+      var toggle = document.getElementById('sidebarLogoToggle');
+      if (!toggle || toggle.querySelector('.y7st-sidebar-logo')) return;
+      done = true;
+      toggle.innerHTML = '';
+      var img = document.createElement('img');
+      img.className = 'y7st-sidebar-logo';
+      img.src = logoSrc;
+      img.alt = 'Y7api';
+      img.style.cssText = 'width:28px;height:28px;border-radius:8px;object-fit:cover;display:block;margin:auto';
+      toggle.appendChild(img);
+    };
+    tryReplace();
+    if (!done) {
+      var observer = new MutationObserver(function() { tryReplace(); if (done) observer.disconnect(); });
+      observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+      // 5 秒后断开观察器，避免资源浪费
+      setTimeout(function() { observer.disconnect(); }, 5000);
+    }
   }
 
   // 直接用 JS 隐藏上游品牌元素（左下角社交链接、作者名、项目主页、更新按钮、版本号）
-  // 不用 CSS 规则，避免上游 CSS 优先级覆盖
+  // 用 MutationObserver 监听 DOM 变化，确保即使上游 JS 动态渲染也能第一时间隐藏
   function hideUpstreamBranding() {
     if (isWelcome) return;
-    ['github-entry-btn','update-now-btn','project-version-badge'].forEach(function(id){
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
+    const hideEl = function(el) { if (el) el.style.display = 'none'; };
+    const hideAll = function(sel) {
+      document.querySelectorAll(sel).forEach(function(el) { el.style.display = 'none'; });
+    };
+    // 立即执行一次
+    ['github-entry-btn','update-now-btn','project-version-badge'].forEach(function(id){ hideEl(document.getElementById(id)); });
+    hideAll('.author-name-lite,.letter-d,.letter-x,.social-row-lite');
+    // 再用 MutationObserver 持续监听，防止上游 JS 重新渲染
+    var observer = new MutationObserver(function() {
+      ['github-entry-btn','update-now-btn','project-version-badge'].forEach(function(id){ hideEl(document.getElementById(id)); });
+      hideAll('.author-name-lite,.letter-d,.letter-x,.social-row-lite');
     });
-    document.querySelectorAll('.author-name-lite,.letter-d,.letter-x,.social-row-lite').forEach(function(el){
-      el.style.display = 'none';
-    });
+    observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
   }
 
   function init() {
