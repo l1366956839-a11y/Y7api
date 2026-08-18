@@ -118,6 +118,7 @@ const countdownEl=document.getElementById('countdown');
 const shellPort=${JSON.stringify(shellPort)};
 const startedAt=Date.now();
 let ready=false,polling=false,progress=8,countdownTimer=null,countdownLeft=20;
+let fallbackTimer=null; // 兜底：30 秒后不管探测结果如何直接跳转
 const phaseText={
   init:'正在准备启动环境…',
   extract:'正在解压运行环境，首次启动会稍慢。',
@@ -135,9 +136,12 @@ const phaseProgress={init:8,extract:45,'dependency-check':62,'upstream-health':8
 function enterApp(){
   if(!(ready&&progress>=100)) return;
   if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}
+  if(fallbackTimer){clearTimeout(fallbackTimer);fallbackTimer=null;}
   const target='http://127.0.0.1:'+shellPort+'/canvas';
+  // 多种方式尝试导航，确保至少有一种能生效
+  try { window.location.replace(target); } catch(e) {}
+  try { window.location.href = target; } catch(e) {}
   if(window.y7stWindow&&window.y7stWindow.navigateTo) window.y7stWindow.navigateTo(target);
-  else location.href=target;
 }
 function startCountdown(){
   if(countdownTimer) return;
@@ -227,6 +231,12 @@ logsBtn.addEventListener('click',async()=>{
 });
 setProgress(8,'init');
 setInterval(tickElapsed,1000);
+fallbackTimer=setTimeout(()=>{
+  // 兜底：30 秒后不管 canvasReady 有没有返回，直接进画布
+  if(!ready){ ready=true; setProgress(100,'ready'); }
+  statusEl.textContent='正在进入软件…';
+  enterApp();
+},30000);
 tick();
 </script></body></html>`;
   return `data:text/html;charset=UTF-8,${encodeURIComponent(html)}`;
